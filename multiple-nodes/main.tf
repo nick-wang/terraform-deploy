@@ -17,8 +17,8 @@ module "base" {
   iprange = "${var.iprange}"
 
   # Optional parameters below
-  prefix   = "${var.name_prefix}"
-  netname  = "${var.netname}"
+  prefix   = "${var.name_prefix}${terraform.workspace == "default" ? "" : terraform.workspace}"
+  netname  = "${var.netname}${terraform.workspace == "default" ? "" : terraform.workspace}"
 
   # Not used parameters
   timezone = "${var.timezone}"
@@ -28,7 +28,7 @@ module "host" {
    source             = "./modules/host"
    base_configuration = "${module.base.configuration}"
 
-   name    = "${var.hostname}"
+   name    = "${var.hostname}${terraform.workspace == "default" ? "" : terraform.workspace}"
    count   = "${var.count}"
    drbd_disk_count = "${var.drbd_disk_count}"
    drbd_disk_size  = "${var.drbd_disk_size}"
