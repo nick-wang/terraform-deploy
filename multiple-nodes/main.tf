@@ -34,3 +34,7 @@ module "host" {
    drbd_disk_size  = "${var.drbd_disk_size}"
    host_ips        = "${var.host_ips}"
 }
+
+output "iplist" {
+  value = "${var.host_ips}"
+}
