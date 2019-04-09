@@ -2,7 +2,15 @@
 
 # Update the git repo drbd
 pushd /root/Source/drbd-formula.git
-git pull origin dev
+git checkout dev
+#git pull origin dev
+git pull local dev
+popd
+
+pushd /root/Source/salt-drbd.git
+git checkout dev
+#git pull origin dev
+git pull local dev
 popd
 
 # Copy the files
@@ -48,5 +56,3 @@ fi
 
 # Need to reboot before try accept salt cluster
 reboot
-
-
