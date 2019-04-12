@@ -20,7 +20,10 @@ cp -rf /root/Source/drbd-formula.git/drbd/         /srv/salt
 cp -rf /root/Source/timezone-formula.git/timezone/ /srv/salt
 
 cp /root/Source/drbd-formula.git/pillar.example     /srv/pillar/drbd/formula.sls
+cp /root/Source/drbd-formula.git/pillar.example     /srv/pillar/drbd/formula_pri.sls
 cp /root/Source/timezone-formula.git/pillar.example /srv/pillar/timezone/formula.sls
+
+sed -i "s/\(.*promotion: \).*/\1true/" /srv/pillar/drbd/formula_pri.sls
 
 # Copy the files of modules/state
 # After any modification on master, should run:  salt '*' saltutil.sync_all
@@ -58,11 +61,12 @@ hostname salt-node${NUM}
 # Enable the salt master/minion service and connect
 if [ ${NUM} -eq 1 ]
 then
-        systemctl enable salt-master.service
-	sleep 1
+    sed -i "s/\(.*promotion: \).*/\1true/" /srv/pillar/drbd/formula_pri.sls
+    systemctl enable salt-master.service
 else
-        systemctl enable salt-minion.service
+    systemctl enable salt-minion.service
 fi
+sleep 1
 
 # Need to reboot before try accept salt cluster
 reboot
