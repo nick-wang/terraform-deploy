@@ -78,8 +78,42 @@ sleep 1
 
 # Need to reboot before try accept salt cluster
 reboot
+
 # /srv/salt/top.sls
 # /srv/salt/pillar.sls
+#  salt/
+#  └── top.sls
+#  pillar/
+#  ├── backup.tgz
+#  ├── drbd
+#  │   ├── formula_pri.sls
+#  │   └── formula.sls
+#  ├── dummy-pillar
+#  │   └── test.sls
+#  ├── dummy.sls
+#  ├── README
+#  ├── timezone
+#  │   └── formula.sls
+#  └── top.sls
+#  
+#  3 directories, 9 files
+#  base:
+#    'salt-node*':
+#      - drbd
+#    '*':
+#      - timezone
+#  
+#  base:
+#    'salt-node2':
+#      - drbd.formula_pri
+#    'salt-node3':
+#      - drbd.formula
+#    '*':
+#      - timezone.formula
+#      - dummy-pillar.test
+#      - dummy
+
+
 
 
 # Commands to run
