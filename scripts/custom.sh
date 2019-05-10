@@ -13,6 +13,12 @@ git checkout dev
 git pull local dev
 popd
 
+pushd /root/Source/salt-shaptools.git
+git checkout dev
+#git pull origin dev
+git pull local dev
+popd
+
 # Copy the files of formula
 # run as: salt '*' state.apply drbd
 #      or salt '*' state.apply drbd.global_confs
@@ -30,8 +36,10 @@ sed -i "s/\(.*promotion: \).*/\1true/" /srv/pillar/drbd/formula_pri.sls
 mkdir -p /srv/salt/_modules
 mkdir -p /srv/salt/_states
 
-cp /root/Source/salt-drbd.git/salt/modules/drbd.py  /srv/salt/_modules
-cp /root/Source/salt-drbd.git/salt/states/drbd.py  /srv/salt/_states
+#cp /root/Source/salt-drbd.git/salt/modules/drbd.py  /srv/salt/_modules
+#cp /root/Source/salt-drbd.git/salt/states/drbd.py  /srv/salt/_states
+cp /root/Source/salt-shaptools.git/salt/modules/drbd.py  /srv/salt/_modules
+cp /root/Source/salt-shaptools.git/salt/states/drbd.py  /srv/salt/_states
 
 
 # Partitioning the /dev/vdb
@@ -70,6 +78,8 @@ sleep 1
 
 # Need to reboot before try accept salt cluster
 reboot
+# /srv/salt/top.sls
+# /srv/salt/pillar.sls
 
 
 # Commands to run
