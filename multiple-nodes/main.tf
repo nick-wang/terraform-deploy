@@ -38,3 +38,19 @@ module "host" {
 output "iplist" {
   value = "${var.host_ips}"
 }
+
+output "iprange" {
+  value = "${var.iprange}"
+}
+
+output "base.configuration" {
+  value = "${module.base.configuration}"
+}
+
+output "host.information" {
+  value = "${module.host.information}"
+}
+
+output "host.addresses" {
+  value = "${module.host.addresses}"
+}
