@@ -58,16 +58,33 @@ w
 "|fdisk ${disk}
 
 
+# hostname master: salt-master
+# hostname minions: salt-drbdX
+# Need to change /etc/hosts and /etc/salt/minion
+MASTER="salt-master"
+MINION="drbd-node"
+
+# Get the last char of IP addr
+IP=$(ip a |grep "192.168.10" |cut -d " " -f "6"|cut -d "/" -f "1")
+IPLEN=$((${#IP}-1))
+NUM=${IP:$IPLEN:1}
+
 # Modify the hostname
-NUM=$(ip a |grep "192.168.10" |cut -d " " -f "6"|cut -d "/" -f "1"|cut -d "0" -f "3")
-sed -i "s/.*/salt-node${NUM}/g" /etc/HOSTNAME
-sed -i "s/.*/salt-node${NUM}/g" /etc/hostname
-hostnamectl set-hostname "salt-node${NUM}"
-hostname salt-node${NUM}
+if [ ${NUM} -eq 0 ]
+then
+    NAME=$MASTER
+else
+    NAME=${MINION}${NUM}
+fi
+
+sed -i "s/.*/${NAME}/g" /etc/HOSTNAME
+sed -i "s/.*/${NAME}/g" /etc/hostname
+hostnamectl set-hostname "${NAME}"
+hostname "${NAME}"
 
 
 # Enable the salt master/minion service and connect
-if [ ${NUM} -eq 1 ]
+if [ ${NUM} -eq 0 ]
 then
     systemctl enable salt-master.service
 else
