@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+# The git repos could be replaced by rpm
 # Update the git repo drbd
 pushd /root/Source/drbd-formula.git
 git checkout dev
@@ -7,11 +9,12 @@ git checkout dev
 git pull local dev
 popd
 
-pushd /root/Source/salt-drbd.git
-git checkout dev
-#git pull origin dev
-git pull local dev
-popd
+# No longer use,since it merged into salt-shaptools.git
+#pushd /root/Source/salt-drbd.git
+#git checkout dev
+##git pull origin dev
+#git pull local dev
+#popd
 
 pushd /root/Source/salt-shaptools.git
 git checkout dev
@@ -19,14 +22,31 @@ git checkout dev
 git pull local dev
 popd
 
+pushd /root/Source/habootstrap-formula.git
+#git checkout master
+#git pull origin master
+git pull local master
+popd
+
+pushd /root/Source/nfs-formula.git
+#git checkout master
+#git pull origin master
+git pull local master
+popd
+
 # Copy the files of formula
 # run as: salt '*' state.apply drbd
 #      or salt '*' state.apply drbd.global_confs
-cp -rf /root/Source/drbd-formula.git/drbd/         /srv/salt
-cp -rf /root/Source/timezone-formula.git/timezone/ /srv/salt
+cp -rf /root/Source/drbd-formula.git/drbd/          /srv/salt
+cp -rf /root/Source/timezone-formula.git/timezone/  /srv/salt
+cp -rf /root/Source/habootstrap-formula.git/cluster /srv/salt
+cp -rf /root/Source/nfs-formula.git/nfs/            /srv/salt
 
 cp /root/Source/drbd-formula.git/pillar.example     /srv/pillar/drbd/formula.sls
 cp /root/Source/timezone-formula.git/pillar.example /srv/pillar/timezone/formula.sls
+# FiXME - the pillar file and top file
+cp /root/Source/habootstrap-formula.git/pillar.example /srv/pillar/cluster/formula.sls.edit
+cp /root/Source/nfs-formula.git/nfs/pillar.example     /srv/salt/nfs/formula.sls
 
 # No need due to use grains['host'] to check
 #sed -i "s/\(.*promotion: \).*/\1\"salt-node2\"/" /srv/pillar/drbd/formula.sls
@@ -36,12 +56,27 @@ cp /root/Source/timezone-formula.git/pillar.example /srv/pillar/timezone/formula
 mkdir -p /srv/salt/_modules
 mkdir -p /srv/salt/_states
 
+
 #cp /root/Source/salt-drbd.git/salt/modules/drbd.py  /srv/salt/_modules
 #cp /root/Source/salt-drbd.git/salt/states/drbd.py  /srv/salt/_states
 cp /root/Source/salt-shaptools.git/salt/modules/drbd.py  /srv/salt/_modules
+cp /root/Source/salt-shaptools.git/salt/modules/crmshmod.py  /srv/salt/_modules
 cp /root/Source/salt-shaptools.git/salt/states/drbd.py  /srv/salt/_states
+cp /root/Source/salt-shaptools.git/salt/states/crmshmod.py  /srv/salt/_states
 
 
+# For nfs
+mkdir -p /srv/nfshome
+mkdir -p /mnt/mytest
+echo "Hello world!" >/srv/nfshome/fileA
+echo "Hello Nick!" >/srv/nfshome/fileB
+
+# TODO:
+# 1. mkfs the drbd
+#    https://www.tecmint.com/find-linux-filesystem-type/
+# 2. configure sbd for cluster
+
+# Could be replaced by salt, configurate in terraform
 # Partitioning the /dev/vdb
 disk="/dev/vdb"
 echo "n
@@ -95,6 +130,9 @@ sleep 1
 # Need to reboot before try accept salt cluster
 reboot
 
+
+#Notes:
+#
 # /srv/salt/top.sls
 # /srv/salt/pillar.sls
 #  salt/
@@ -141,3 +179,16 @@ reboot
 #									salt '*' state.apply drbd.dummy test=True
 #	refer to:	/srv/salt/drbd/xxx.sls (from formula but not init.sls)
 #   	func 	/srv/salt/_states/drbd.py (func dummy in xxx.sls)
+
+# NFS related:
+# node1:   nfs.server
+#            Install pkgs,start service(nfs-server)
+#            # showmount -e 192.168.10.101
+# node2:   nfs.client
+#            # Install pkgs
+#          nfs.mount
+#            # verify:   mount
+#            #           l /mnt/mytest/
+#          nfs.unmount
+#            # verify:   mount
+
