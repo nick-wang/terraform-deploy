@@ -10,26 +10,33 @@ locals {
 }
 
 resource "libvirt_volume" "main_disk" {
-  name             = "${var.base_configuration["prefix"]}-${var.name}${var.count > 1 ? "-${count.index  + 1}" : ""}-maindisk"
+  name             = "${var.base_configuration["prefix"]}-${var.name}${var.hcount > 1 ? "-${count.index  + 1}" : ""}-maindisk"
   base_volume_name = "${var.base_configuration["shared_img"] ? "" : var.base_configuration["prefix"]}-baseimage"
   pool             = "${var.base_configuration["pool"]}"
-  count            = "${var.count}"
+  count            = "${var.hcount}"
 }
 
 resource "libvirt_volume" "drbd_disk" {
-  name  = "${var.base_configuration["prefix"]}-${var.name}${var.count * var.drbd_disk_count > 1 ? "-${count.index  + 1}" : ""}-drbddisk"
+  name  = "${var.base_configuration["prefix"]}-${var.name}${var.hcount * var.drbd_disk_count > 1 ? "-${count.index  + 1}" : ""}-drbddisk"
   pool  = "${var.base_configuration["pool"]}"
-  count = "${var.count * var.drbd_disk_count}"
+  count = "${var.hcount * var.drbd_disk_count}"
   size  = "${var.drbd_disk_size}"
+}
+
+resource "libvirt_volume" "sbd_disk" {
+  name  = "${var.base_configuration["prefix"]}-${var.name}-sbddisk"
+  pool  = "${var.base_configuration["pool"]}"
+  count = 1
+  size  = "102400000"  # 100M
 }
 
 // https://github.com/dmacvicar/terraform-provider-libvirt/blob/master/website/docs/r/domain.html.markdown
 resource "libvirt_domain" "domain" {
-  name       = "${var.base_configuration["prefix"]}-${var.name}${var.count > 1 ? "-${count.index  + 1}" : ""}"
+  name       = "${var.base_configuration["prefix"]}-${var.name}${var.hcount > 1 ? "-${count.index  + 1}" : ""}"
   memory     = "${var.memory}"
   vcpu       = "${var.vcpu}"
   running    = "${var.running}"
-  count      = "${var.count}"
+  count      = "${var.hcount}"
   qemu_agent = true
 
   # FIXME, need to calc the count of drbd_disks to support flexible var.drbd_disk_count
@@ -44,6 +51,10 @@ resource "libvirt_domain" "domain" {
     var.additional_disk
   )}"]
 
+  disk {
+    volume_id = "${element(libvirt_volume.sbd_disk.*.id, 0)}"
+  }
+
   network_interface = ["${list(
     merge(
       map(
@@ -53,7 +64,7 @@ resource "libvirt_domain" "domain" {
         "wait_for_lease", true,
       ),
       map(
-        "addresses",  "${list("${local.network_addresses[0]}${count.index+1}")}",
+        "addresses",  "${list("${local.network_addresses[0]}${count.index}")}",
       )
     ))}"]
 
@@ -67,7 +78,7 @@ resource "libvirt_domain" "domain" {
 #        "wait_for_lease", true,
 #      ),
 #      map(
-#        "addresses",  "${list("${local.network_addresses[0]}${count.index+1}")}",
+#        "addresses",  "${list("${local.network_addresses[0]}${count.index}")}",
 #      )
 #    ),
 #    merge(
@@ -77,7 +88,7 @@ resource "libvirt_domain" "domain" {
 #        "wait_for_lease", true,
 #      ),
 #      map(
-#        "addresses",  "${list("${local.network_addresses[1]}${count.index+1}")}",
+#        "addresses",  "${list("${local.network_addresses[1]}${count.index}")}",
 #      )
 #    ),
 #  )}"]
@@ -89,7 +100,6 @@ output "information" {
     "libvirt_volume.main_disk",
     "libvirt_volume.drbd_disk",
     "libvirt_domain.domain",
-    ""
   ]
 
   value = {
@@ -101,4 +111,8 @@ output "addresses" {
   // Returning only the addresses is not possible right now. Will be available in terraform 12
   // https://bradcod.es/post/terraform-conditional-outputs-in-modules/
   value = "${libvirt_domain.domain.*.network_interface}"
+}
+
+output "diskes" {
+  value = "${libvirt_domain.domain.*.disk}"
 }

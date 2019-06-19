@@ -18,19 +18,19 @@ variable "hostname" {
   default     = "testnode"
 }
 
-variable "count" {
+variable "hcount" {
   description = "Number of hosts like this one"
-  default     = 1 
+  default     = 1
 }
 
 variable "drbd_disk_count" {
   description = "Number of drbd disk"
-  default     = 1 
+  default     = 1
 }
 
 variable "drbd_disk_size" {
   description = "drbd partition disk size"
-  default     = "1024000000"              # 1GB 
+  default     = "1024000000"              # 1GB
 }
 
 variable "host_ips" {

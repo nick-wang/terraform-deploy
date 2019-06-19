@@ -29,7 +29,7 @@ module "host" {
    base_configuration = "${module.base.configuration}"
 
    name    = "${var.hostname}${terraform.workspace == "default" ? "" : terraform.workspace}"
-   count   = "${var.count}"
+   hcount   = "${var.hcount}"
    drbd_disk_count = "${var.drbd_disk_count}"
    drbd_disk_size  = "${var.drbd_disk_size}"
    host_ips        = "${var.host_ips}"
@@ -43,14 +43,18 @@ output "iprange" {
   value = "${var.iprange}"
 }
 
-output "base.configuration" {
+output "base_configuration" {
   value = "${module.base.configuration}"
 }
 
-output "host.information" {
+output "host_information" {
   value = "${module.host.information}"
 }
 
-output "host.addresses" {
+output "host_addresses" {
   value = "${module.host.addresses}"
+}
+
+output "host_diskes" {
+  value = "${module.host.diskes}"
 }

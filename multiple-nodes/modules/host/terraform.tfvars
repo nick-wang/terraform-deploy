@@ -12,4 +12,4 @@ base_configuration = {
   network_id = "6207f3cf-3467-4d9d-b235-b258e9c442e7"
 }
 
-count=2
+hcount=2

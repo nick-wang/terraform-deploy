@@ -1,5 +1,5 @@
 variable "base_configuration" {
-  description = "use ${module.base.configuration}, see the main.tf example file"
+  description = "use module.base.configuration, see the main.tf example file"
   type        = "map"
 }
 
@@ -13,7 +13,7 @@ variable "name" {
   default     = "testnode"
 }
 
-variable "count" {
+variable "hcount" {
   description = "Number of hosts like this one"
   default     = 1
 }
