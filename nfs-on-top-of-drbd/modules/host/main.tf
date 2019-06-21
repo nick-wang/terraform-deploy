@@ -23,11 +23,18 @@ resource "libvirt_volume" "drbd_disk" {
   size  = "${var.drbd_disk_size}"
 }
 
+#https://github.com/dmacvicar/terraform-provider-libvirt/blob/master/website/docs/r/volume.html.markdown
 resource "libvirt_volume" "sbd_disk" {
   name  = "${var.base_configuration["prefix"]}-${var.name}-sbddisk"
   pool  = "${var.base_configuration["pool"]}"
   count = 1
   size  = "102400000"  # 100M
+
+  #https://www.w3schools.com/xml/xsl_languages.asp
+  #https://libvirt.org/formatstorage.html#exampleVol
+  xml {
+    xslt = "${file("modules/host/volume_raw.xsl")}"
+  }
 }
 
 // https://github.com/dmacvicar/terraform-provider-libvirt/blob/master/website/docs/r/domain.html.markdown
@@ -53,6 +60,11 @@ resource "libvirt_domain" "domain" {
 
   disk {
     volume_id = "${element(libvirt_volume.sbd_disk.*.id, 0)}"
+  }
+
+  #https://libvirt.org/formatdomain.html
+  xml {
+    xslt = "${file("modules/host/shareable.xsl")}"
   }
 
   network_interface = ["${list(
